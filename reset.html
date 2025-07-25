@@ -10,23 +10,21 @@
   <div id="content">Vérification du lien...</div>
 
   <script>
-    // ✅ Config Supabase
+    // ✅ CONFIGURATION SUPABASE
     const SUPABASE_URL = "https://pejuuumzahfomdayxjed.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlanV1dW16YWhmb21kYXl4amVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NDEyNzksImV4cCI6MjA2NDIxNzI3OX0.kdkluDF2G7kbxyWHLt9pBTpaadrrrH7TndqJBQdv6h8"; 
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlanV1dW16YWhmb21kYXl4amVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NDEyNzksImV4cCI6MjA2NDIxNzI3OX0.kdkluDF2G7kbxyWHLt9pBTpaadrrrH7TndqJBQdv6h8";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ✅ Récupérer token & type dans l’URL
+    // ✅ Récupération du token depuis l’URL
     const params = new URLSearchParams(window.location.hash.replace("#", "?"));
     const token = params.get("access_token");
     const type = params.get("type");
 
     if (token && type === "recovery") {
-      // ✅ Valider le lien
       supabaseClient.auth.exchangeCodeForSession({ access_token: token }).then(({ error }) => {
         if (error) {
           document.getElementById("content").innerHTML = "<p>❌ Lien invalide ou expiré.</p>";
         } else {
-          // ✅ Afficher formulaire
           document.getElementById("content").innerHTML = `
             <p>✅ Lien valide, entrez votre nouveau mot de passe :</p>
             <input type="password" id="newPass" placeholder="Nouveau mot de passe" style="padding:10px; width:250px; margin:10px;" />
@@ -39,7 +37,7 @@
       document.getElementById("content").innerHTML = "<p>❌ Lien invalide.</p>";
     }
 
-    // ✅ Fonction pour changer le mot de passe
+    // ✅ Envoi du nouveau mot de passe
     async function resetPassword() {
       const newPass = document.getElementById("newPass").value;
       if (!newPass || newPass.length < 6) {
