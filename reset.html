@@ -1,35 +1,37 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Réinitialiser le mot de passe</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body style="font-family: sans-serif; text-align: center; padding: 40px; background: #101013; color: #cfc7b4;">
   <h1>Réinitialiser votre mot de passe</h1>
   <div id="content">Vérification du lien...</div>
 
   <script>
+    // ✅ Config Supabase
+    const SUPABASE_URL = "https://pejuuumzahfomdayxjed.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlanV1dW16YWhmb21kYXl4amVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NDEyNzksImV4cCI6MjA2NDIxNzI3OX0.kdkluDF2G7kbxyWHLt9pBTpaadrrrH7TndqJBQdv6h8"; 
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ✅ Récupérer token & type dans l’URL
     const params = new URLSearchParams(window.location.hash.replace("#", "?"));
     const token = params.get("access_token");
     const type = params.get("type");
 
-    // ✅ Ton URL de projet Supabase
-    const SUPABASE_URL = "https://pejuuumzahfomdayxjed.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlanV1dW16YWhmb21kYXl4amVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NDEyNzksImV4cCI6MjA2NDIxNzI3OX0.kdkluDF2G7kbxyWHLt9pBTpaadrrrH7TndqJBQdv6h8"; // ⚠️ Mets ta clé anonyme publique
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
     if (token && type === "recovery") {
-      // Valider le lien
-      supabase.auth.exchangeCodeForSession({ access_token: token }).then(({ error }) => {
+      // ✅ Valider le lien
+      supabaseClient.auth.exchangeCodeForSession({ access_token: token }).then(({ error }) => {
         if (error) {
           document.getElementById("content").innerHTML = "<p>❌ Lien invalide ou expiré.</p>";
         } else {
           // ✅ Afficher formulaire
           document.getElementById("content").innerHTML = `
             <p>✅ Lien valide, entrez votre nouveau mot de passe :</p>
-            <input type="password" id="newPass" placeholder="Nouveau mot de passe" />
-            <button onclick="resetPassword()">Confirmer</button>
+            <input type="password" id="newPass" placeholder="Nouveau mot de passe" style="padding:10px; width:250px; margin:10px;" />
+            <br/>
+            <button style="padding:10px 20px; background:#cfc7b4; border:none; color:#202227; font-weight:bold;" onclick="resetPassword()">Confirmer</button>
           `;
         }
       });
@@ -37,13 +39,18 @@
       document.getElementById("content").innerHTML = "<p>❌ Lien invalide.</p>";
     }
 
+    // ✅ Fonction pour changer le mot de passe
     async function resetPassword() {
       const newPass = document.getElementById("newPass").value;
-      const { error } = await supabase.auth.updateUser({ password: newPass });
+      if (!newPass || newPass.length < 6) {
+        alert("Le mot de passe doit contenir au moins 6 caractères.");
+        return;
+      }
+      const { error } = await supabaseClient.auth.updateUser({ password: newPass });
       if (error) {
         alert("Erreur : " + error.message);
       } else {
-        document.getElementById("content").innerHTML = "<p>✅ Mot de passe changé avec succès !</p>";
+        document.getElementById("content").innerHTML = "<p>✅ Mot de passe changé avec succès ! Vous pouvez fermer cette page.</p>";
       }
     }
   </script>
