@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirmation Email</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Confirmation de votre email</h1>
+  <div id="content">Vérification du lien...</div>
+
+  <script>
+    const params = new URLSearchParams(window.location.hash.replace("#", "?"));
+    const token = params.get("access_token");
+    const type = params.get("type");
+
+    const SUPABASE_URL = "https://pejuuumzahfomdayxjed.supabase.co";
+    const SUPABASE_KEY = "ANON_KEY_ICI";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    if (token && (type === "signup" || type === "email_change")) {
+      supabase.auth.exchangeCodeForSession({ access_token: token }).then(({ error }) => {
+        if (error) {
+          document.getElementById("content").innerHTML = "<p>❌ Lien invalide ou expiré.</p>";
+        } else {
+          let msg = type === "signup" 
+            ? "✅ Email confirmé ! Votre compte est activé." 
+            : "✅ Votre email a été mis à jour avec succès.";
+          document.getElementById("content").innerHTML = `<p>${msg}</p>`;
+        }
+      });
+    } else {
+      document.getElementById("content").innerHTML = "<p>❌ Lien invalide.</p>";
+    }
+  </script>
+</body>
+</html>
