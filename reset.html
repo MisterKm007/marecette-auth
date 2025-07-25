@@ -7,18 +7,42 @@
 </head>
 <body style="font-family: sans-serif; text-align: center; padding: 40px; background: #101013; color: #cfc7b4;">
   <h1>Réinitialiser votre mot de passe</h1>
-  <div id="content">
-    ✅ Lien vérifié, vous pouvez choisir un nouveau mot de passe :
-    <br><br>
-    <input type="password" id="newPass" placeholder="Nouveau mot de passe" style="padding:10px; width:250px; margin:10px;" />
-    <br/>
-    <button style="padding:10px 20px; background:#cfc7b4; border:none; color:#202227; font-weight:bold;" onclick="resetPassword()">Confirmer</button>
-  </div>
+  <div id="content">Vérification du lien...</div>
 
   <script>
     const SUPABASE_URL = "https://pejuuumzahfomdayxjed.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlanV1dW16YWhmb21kYXl4amVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2NDEyNzksImV4cCI6MjA2NDIxNzI3OX0.kdkluDF2G7kbxyWHLt9pBTpaadrrrH7TndqJBQdv6h8";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const params = new URLSearchParams(window.location.hash.replace("#", "?"));
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
+    const type = params.get("type");
+
+    async function main() {
+      if (type === "recovery" && access_token && refresh_token) {
+        // ✅ Restaurer la session à partir du token du lien
+        const { data, error } = await supabaseClient.auth.setSession({
+          access_token,
+          refresh_token
+        });
+
+        if (error) {
+          document.getElementById("content").innerHTML = "<p>❌ Impossible de restaurer la session : " + error.message + "</p>";
+          return;
+        }
+
+        // ✅ Maintenant la session est active → on peut changer le mot de passe
+        document.getElementById("content").innerHTML = `
+          <p>✅ Session restaurée, entrez votre nouveau mot de passe :</p>
+          <input type="password" id="newPass" placeholder="Nouveau mot de passe" style="padding:10px; width:250px; margin:10px;" />
+          <br/>
+          <button style="padding:10px 20px; background:#cfc7b4; border:none; color:#202227; font-weight:bold;" onclick="resetPassword()">Confirmer</button>
+        `;
+      } else {
+        document.getElementById("content").innerHTML = "<p>❌ Lien invalide ou incomplet.</p>";
+      }
+    }
 
     async function resetPassword() {
       const newPass = document.getElementById("newPass").value;
@@ -33,6 +57,8 @@
         document.getElementById("content").innerHTML = "<p>✅ Mot de passe changé avec succès ! Vous pouvez fermer cette page.</p>";
       }
     }
+
+    main();
   </script>
 </body>
 </html>
