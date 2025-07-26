@@ -4,10 +4,35 @@
   <meta charset="UTF-8">
   <title>Confirmation d'email</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 40px;
+      background: #101013;
+      color: #cfc7b4;
+    }
+    .loader {
+      border: 4px solid #333;
+      border-top: 4px solid #cfc7b4;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      margin: 20px auto;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
-<body style="font-family: sans-serif; text-align: center; padding: 40px; background: #101013; color: #cfc7b4;">
+<body>
   <h1>Confirmation d'email</h1>
-  <div id="content">Vérification du lien...</div>
+  <div id="content">
+    <div class="loader"></div>
+    <p>Vérification du lien...</p>
+  </div>
 
   <script>
     const SUPABASE_URL = "https://pejuuumzahfomdayxjed.supabase.co";
@@ -21,7 +46,6 @@
 
     async function main() {
       if ((type === "signup" || type === "email_change") && access_token && refresh_token) {
-        // ✅ Restaurer la session pour valider le lien
         const { error } = await supabaseClient.auth.setSession({
           access_token,
           refresh_token
@@ -32,12 +56,17 @@
           return;
         }
 
-        // ✅ Message différent selon le type
         if (type === "signup") {
           document.getElementById("content").innerHTML = "<p>✅ Votre email est maintenant confirmé !</p>";
         } else if (type === "email_change") {
           document.getElementById("content").innerHTML = "<p>✅ Votre adresse email a été mise à jour avec succès !</p>";
         }
+
+        // ✅ Redirection après 3 secondes
+        setTimeout(() => {
+          window.location.href = "https://ton-site.netlify.app"; 
+        }, 3000);
+
       } else {
         document.getElementById("content").innerHTML = "<p>❌ Lien invalide ou expiré.</p>";
       }
